@@ -16,16 +16,16 @@ axios.get(baseURL + "films/" + filmNumber).then(result => {
     return result.data["planets"]; // get all planets URL from the film *filmNumber*
 }).then(
     planetsUrls => {
-        console.log(planetsUrls);
-        return planetsUrls.map(x => axios.get(x)); // get planets as JSON documents
+        return Promise.all(planetsUrls.map(x => axios.get(x))); // get planets as JSON documents
     }
 ).then(
     planets => { // filter out planets without water and mountains
-        console.log(planets);
-        return planets.filter(x => x["surface_water"] > 0 && x["terrain"].contains("mountains"))
+
+        return planets.filter(x => x["data"]["surface_water"] > 0 && x["data"]["terrain"].includes("mountains")).map(x => x["data"])
     }
 ).then(
     filteredPlanets => { // reduce filtered planets to their diameter and sum them up
-        console.log(filteredPlanets.reduce((acc, currentPlanet) => acc + parseInt(currentPlanet["diameter"])), 0);
+        console.log(filteredPlanets.map(x => parseInt(x["diameter"])).reduce((accumulator, current) => accumulator + current,0));
     }
-).catch(error => {console.log("SWAPI is down");});
+).catch(error => {console.log("SWAPI is down");
+console.log(error)});
